@@ -29,8 +29,15 @@ public final class TestVault {
 	private TestVault() {
 	}
 
-	/** Starts Vault once and points the app at it with AppRole ms-auth-local. */
+	/** Where tests send Keycloak calls unless they point at {@link TestKeycloak}: nothing listens there. */
+	public static final String NO_KEYCLOAK = "http://127.0.0.1:1";
+
+	/**
+	 * Starts Vault once and points the app at it with AppRole ms-auth-local. Every test that starts the app
+	 * calls this, so it also points Keycloak at {@link #NO_KEYCLOAK}: no test can reach the real local Keycloak.
+	 */
 	public static synchronized void start() {
+		System.setProperty("KEYCLOAK_URL", NO_KEYCLOAK);
 		if (!started) {
 			VAULT.start();
 			vault("VAULT_ADMIN_PASSWORD=admin /vault/setup/init-auth.sh");

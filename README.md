@@ -1,6 +1,6 @@
 # xbank-ms-auth
 
-Registration and sign-in service for XBank. At this stage it has a health endpoint and loads its Keycloak client secret from Vault at startup; features arrive one change at a time.
+Registration and sign-in service for XBank. Users register through it; Keycloak holds them. Sign-in endpoints arrive one change at a time.
 
 ## Requirements
 
@@ -35,7 +35,47 @@ docker compose exec vault vault read -field=role_id auth/approle/role/ms-auth-lo
 docker compose exec vault vault write -f -field=secret_id auth/approle/role/ms-auth-local/secret-id
 ```
 
-`VAULT_URL` overrides the Vault address (default `http://localhost:8200` for local, `http://vault:8200` in Docker).
+`VAULT_URL` overrides the Vault address (default `http://localhost:8200` for local, `http://vault:8200` in Docker). `KEYCLOAK_URL` overrides the Keycloak address (default `http://localhost:8180` for local, `http://keycloak:8080` in Docker). The realm is `xbankDev` for `local` and `dev`, `xbank` for `prod`.
+
+## API
+
+### `POST /api/v1/auth/register`
+
+No token needed. Creates a user in Keycloak with role `USER`; the FIN becomes the username.
+
+```json
+{
+  "fin": "AB12C3D",
+  "email": "user@example.com",
+  "password": "Passw0rd",
+  "firstName": "Ali",
+  "lastName": "Aliyev",
+  "phoneNumber": "+994501234567"
+}
+```
+
+| Field | Rule |
+|---|---|
+| `fin` | 7 uppercase letters or digits |
+| `email` | valid address, unique |
+| `password` | 8+ characters, an uppercase letter, a lowercase letter, a digit |
+| `firstName`, `lastName` | required |
+| `phoneNumber` | `+994` followed by 9 digits, unique |
+
+`201 Created`:
+
+```json
+{
+  "fin": "AB12C3D",
+  "email": "user@example.com",
+  "firstName": "Ali",
+  "lastName": "Aliyev",
+  "phoneNumber": "+994501234567",
+  "roles": ["USER"]
+}
+```
+
+Errors: `400 VALIDATION_FAILED`, `409 FIN_ALREADY_EXISTS`, `409 EMAIL_ALREADY_EXISTS`, `409 PHONE_ALREADY_EXISTS`, `503 UPSTREAM_UNAVAILABLE`.
 
 ## Errors
 
@@ -61,6 +101,9 @@ Clients recognize errors by `code`, never by the message text. `errors` appears 
 | `MALFORMED_REQUEST` | 400 | The request body cannot be read, for example invalid JSON |
 | `NOT_FOUND` | 404 | No resource at this path |
 | `METHOD_NOT_ALLOWED` | 405 | The path does not support this HTTP method |
+| `FIN_ALREADY_EXISTS` | 409 | A user with this FIN already exists |
+| `EMAIL_ALREADY_EXISTS` | 409 | A user with this email already exists |
+| `PHONE_ALREADY_EXISTS` | 409 | A user with this phone number already exists |
 | `UPSTREAM_UNAVAILABLE` | 503 | A service the request depends on is not reachable |
 | `INTERNAL_ERROR` | 500 | Anything unexpected |
 
@@ -95,4 +138,4 @@ Stop them with the same command and `down` instead of `up -d --build`.
 ./gradlew test
 ```
 
-Docker must be running. The tests start their own Vault container, set up with `../xbank-infrastructure/vault/setup/init-auth.sh` (override with `./gradlew test -PinfrastructureDir=<path>`). `ContainerIT` builds the Docker image; the first run takes about a minute and a half.
+Docker must be running. The tests start their own Vault and Keycloak containers, set up with `../xbank-infrastructure/vault/setup/init-auth.sh` and `../xbank-infrastructure/keycloak/realms/xbankDev.json` (override with `./gradlew test -PinfrastructureDir=<path>`). They never use the running infrastructure. `ContainerIT` builds the Docker image; the first run takes about a minute and a half.

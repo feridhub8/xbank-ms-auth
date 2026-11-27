@@ -26,6 +26,7 @@ management:
 
 xbank:
   keycloak:
+    client-id: xbank-ms-auth
     # From Vault: secret/xbank/<env>/ms-auth, key keycloak-client-secret.
     # Empty when the key is missing, so validation stops startup.
     client-secret: ${keycloak-client-secret:}

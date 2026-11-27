@@ -13,6 +13,9 @@ public enum ErrorCode {
 	MALFORMED_REQUEST(HttpStatus.BAD_REQUEST, "Malformed request"),
 	NOT_FOUND(HttpStatus.NOT_FOUND, "Not found"),
 	METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "Method not allowed"),
+	FIN_ALREADY_EXISTS(HttpStatus.CONFLICT, "FIN already exists"),
+	EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists"),
+	PHONE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Phone number already exists"),
 	UPSTREAM_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "Upstream service unavailable"),
 	INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error");
 
