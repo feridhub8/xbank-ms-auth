@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: xbank-ms-auth
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

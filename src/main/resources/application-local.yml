@@ -1,0 +1,3 @@
+# Runs on the developer machine (IDE or ./gradlew bootRun).
+server:
+  port: 9001
