@@ -37,6 +37,35 @@ docker compose exec vault vault write -f -field=secret_id auth/approle/role/ms-a
 
 `VAULT_URL` overrides the Vault address (default `http://localhost:8200` for local, `http://vault:8200` in Docker).
 
+## Errors
+
+Every error response is a ProblemDetail (RFC 9457) with content type `application/problem+json`:
+
+```json
+{
+  "type": "https://xbank.local/errors/validation-failed",
+  "title": "Validation failed",
+  "status": 400,
+  "detail": "One or more fields are invalid",
+  "instance": "/api/v1/...",
+  "code": "VALIDATION_FAILED",
+  "errors": [{ "field": "email", "message": "..." }]
+}
+```
+
+Clients recognize errors by `code`, never by the message text. `errors` appears only for validation failures. Unexpected errors never include stack traces or internal messages; they are logged instead.
+
+| Code | Status | When |
+|---|---|---|
+| `VALIDATION_FAILED` | 400 | The request body has invalid fields (listed in `errors`) |
+| `MALFORMED_REQUEST` | 400 | The request body cannot be read, for example invalid JSON |
+| `NOT_FOUND` | 404 | No resource at this path |
+| `METHOD_NOT_ALLOWED` | 405 | The path does not support this HTTP method |
+| `UPSTREAM_UNAVAILABLE` | 503 | A service the request depends on is not reachable |
+| `INTERNAL_ERROR` | 500 | Anything unexpected |
+
+Features add their own codes to `common/exception/v1/ErrorCode.java`.
+
 ## Build
 
 ```bash
