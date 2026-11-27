@@ -13,3 +13,10 @@ xbank:
   keycloak:
     url: ${KEYCLOAK_URL:http://keycloak:8080}
     realm: xbank
+
+# API docs are for development only.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

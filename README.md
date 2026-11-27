@@ -39,6 +39,13 @@ docker compose exec vault vault write -f -field=secret_id auth/approle/role/ms-a
 
 ## API
 
+In `local` and `dev` the API is documented and can be tried in the browser:
+
+- Swagger UI: `/swagger-ui.html`, for example http://localhost:9001/swagger-ui.html
+- OpenAPI JSON: `/v3/api-docs`
+
+Both are turned off in `prod` (they return `404`).
+
 ### `POST /api/v1/auth/register`
 
 No token needed. Creates a user in Keycloak with role `USER`; the FIN becomes the username.
