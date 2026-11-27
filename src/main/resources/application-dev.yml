@@ -1,0 +1,3 @@
+# Runs in Docker (docker-compose.dev.yml) on xbank_network.
+server:
+  port: 8080

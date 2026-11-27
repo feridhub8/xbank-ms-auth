@@ -1,0 +1,17 @@
+name: xbank
+
+services:
+  ms-auth-dev:
+    build: .
+    image: xbank-ms-auth:dev
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "9101:8080"
+    restart: unless-stopped
+    networks:
+      - xbank_network
+
+networks:
+  xbank_network:
+    external: true
