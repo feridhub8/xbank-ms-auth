@@ -4,6 +4,7 @@ services:
   ms-auth-dev:
     build: .
     image: xbank-ms-auth:dev
+    env_file: .env.dev
     environment:
       SPRING_PROFILES_ACTIVE: dev
     ports:

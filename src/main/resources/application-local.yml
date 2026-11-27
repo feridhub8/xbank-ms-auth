@@ -1,3 +1,11 @@
 # Runs on the developer machine (IDE or ./gradlew bootRun).
+spring:
+  config:
+    # VAULT_ROLE_ID and VAULT_SECRET_ID come from .env, imported in application.yml.
+    import: vault://secret/xbank/local/ms-auth
+  cloud:
+    vault:
+      uri: ${VAULT_URL:http://localhost:8200}
+
 server:
   port: 9001

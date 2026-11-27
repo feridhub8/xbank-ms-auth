@@ -1,9 +1,31 @@
 spring:
   application:
     name: xbank-ms-auth
+  config:
+    # Local runs read VAULT_ROLE_ID and VAULT_SECRET_ID from .env. Imported here, before the
+    # profile files, so the values exist when the profile's vault:// import logs in.
+    # Containers have no .env file (see .dockerignore) and get the values from compose.
+    import: optional:file:./.env[.properties]
+  cloud:
+    vault:
+      # Each profile imports its own path: vault://secret/xbank/<env>/ms-auth
+      fail-fast: true
+      authentication: APPROLE
+      app-role:
+        role-id: ${VAULT_ROLE_ID}
+        secret-id: ${VAULT_SECRET_ID}
+      kv:
+        enabled: true
+        backend: secret
 
 management:
   endpoints:
     web:
       exposure:
         include: health
+
+xbank:
+  keycloak:
+    # From Vault: secret/xbank/<env>/ms-auth, key keycloak-client-secret.
+    # Empty when the key is missing, so validation stops startup.
+    client-secret: ${keycloak-client-secret:}

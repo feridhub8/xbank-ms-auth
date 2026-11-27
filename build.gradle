@@ -17,16 +17,43 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	set('springCloudVersion', '2026.0.0')
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.cloud:spring-cloud-starter-vault-config'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-restclient'
 	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+	testImplementation 'org.testcontainers:testcontainers-vault'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+// Tests set up Vault with the real setup script from the sibling xbank-infrastructure repo.
+// Override with -PinfrastructureDir=<path>.
+def infrastructureDir = providers.gradleProperty('infrastructureDir')
+		.orElse("${rootDir}/../xbank-infrastructure")
+
+tasks.named('processTestResources') {
+	from(infrastructureDir.map { "${it}/vault/setup" }) { into 'infrastructure/vault-setup' }
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	// LocalEnvFileIT runs the built jar as its own process.
+	dependsOn tasks.named('bootJar')
 }

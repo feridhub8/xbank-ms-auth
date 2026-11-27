@@ -4,6 +4,7 @@ services:
   ms-auth-prod:
     build: .
     image: xbank-ms-auth:prod
+    env_file: .env.prod
     environment:
       SPRING_PROFILES_ACTIVE: prod
     ports:

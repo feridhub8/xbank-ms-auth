@@ -16,9 +16,9 @@ import org.yaml.snakeyaml.Yaml;
 class ComposeFileTest {
 
 	@ParameterizedTest
-	@CsvSource({ "docker-compose.dev.yml, dev, 9101", "docker-compose.yml, prod, 9201" })
+	@CsvSource({ "docker-compose.dev.yml, dev, 9101, .env.dev", "docker-compose.yml, prod, 9201, .env.prod" })
 	@SuppressWarnings("unchecked")
-	void composeFileRunsProfileOnItsPort(String file, String profile, String hostPort) throws IOException {
+	void composeFileRunsProfileOnItsPort(String file, String profile, String hostPort, String envFile) throws IOException {
 		Map<String, Object> compose = read(file);
 		Map<String, Map<String, Object>> services = (Map<String, Map<String, Object>>) compose.get("services");
 		Map<String, Object> networks = (Map<String, Object>) compose.get("networks");
@@ -28,6 +28,7 @@ class ComposeFileTest {
 		Map<String, Object> service = services.values().iterator().next();
 
 		assertThat(service).doesNotContainKey("container_name");
+		assertThat(service).containsEntry("env_file", envFile);
 		assertThat((Map<String, Object>) service.get("environment")).containsEntry("SPRING_PROFILES_ACTIVE", profile);
 		assertThat((List<String>) service.get("ports")).containsExactly(hostPort + ":8080");
 		assertThat((List<String>) service.get("networks")).containsExactly("xbank_network");
